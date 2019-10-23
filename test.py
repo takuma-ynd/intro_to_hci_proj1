@@ -3,6 +3,7 @@ import numpy as np
 p = pyaudio.PyAudio()
 
 def play(volume, duration, f):
+    # Source: https://stackoverflow.com/a/27978895/7057866
     # TODO: fix samples to reduce noise in the end of the sound.
     fs = 44100       # sampling rate, Hz, must be integer
 
