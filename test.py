@@ -1,5 +1,6 @@
 import pyaudio
 import numpy as np
+import random
 p = pyaudio.PyAudio()
 
 
@@ -34,23 +35,57 @@ def ending_message(vol1, vol2, f1, f2):
     print("freq1: {}\tfreq2: {}".format(f1, f2))
 
 
+def test(base_volume, base_sound, reference_sound):
+    ref_volume = random.randint(1, 10) / 10
+    while True:
+        play(base_volume, ref_volume, base_sound, reference_sound, 2.0)
+
+        command = input('type + or - >> ')
+        if command == '+':
+            ref_volume += 0.1
+        elif command == '-':
+            ref_volume -= 0.1
+        elif command == '':
+            continue
+        elif command == 'e':
+            break
+
+        else:
+            print('please type + or -')
+
+        if ref_volume < 0:
+            ref_volume = 0
+        elif 10 < ref_volume:
+            ref_volume = 10
+    return ref_volume
+
+
 if __name__ == '__main__':
     base_volume = 0.5     # range [0.0, 1.0]
-    duration = 2.0   # in seconds, may be float
-    f1 = 400.0        # sine frequency, Hz, may be float
-    f2 = 600.0        # sine frequency, Hz, may be float
     print("Please tell if the volumes of the two sounds are identical.")
     print("- The volumes are NOT identical --> [Enter]")
     print("- The volumes are identical --> y [Enter]")
     print()
-    input("Press [Enter] to start >> ")
+    name = input("Enter your name to start \n>> ")
+    csv_lines = []
 
-    for i in range(10):
-        ref_volume = i / 10
-        play(base_volume, ref_volume, f1, f2, duration)
-        print("sample {}:".format(i + 1))
-        ans = input(">> ")
-        if ans == "y":
-            break
-    ending_message(base_volume, ref_volume, f1, f2)
+    base_sounds = [1200, 3400, 5600, 7800]
+    ref_sounds = list(range(100, 11100, 1100))  # [100, 1200, 2300, 3400, 4500, 5600, 6700, 7800, 8900, 10000]
+    # base_sounds = [5600, 7800]
+    # ref_sounds = base_sounds.copy()  # [100, 1200, 2300, 3400, 4500, 5600, 6700, 7800, 8900, 10000]
+    random.shuffle(base_sounds)
+    for base_sound in base_sounds:
+        random.shuffle(ref_sounds)
+        for reference_sound in ref_sounds:
+            ref_vol = test(base_volume, base_sound, reference_sound)
+            print('base_volume', base_volume)
+            print('base_sound', base_sound)
+            print('reference_volume', ref_vol)
+            print('reference_sound', reference_sound)
+            csv_lines.append(','.join(str(e) for e in (name, base_volume, ref_vol, base_sound, reference_sound)))
+
+    with open('output.csv', 'a') as f:
+        f.write('\n'.join(csv_lines))
+
+    # ending_message(base_volume, ref_volume, f1, f2)
     p.terminate()
